@@ -5,6 +5,8 @@ import { MongooseModule } from '@nestjs/mongoose';
 import { User, UserSchema } from './user.schema.js';
 import { HttpModule } from '@nestjs/axios';
 import { Account, AccountSchema } from './user-account.schema.js';
+import { Savings, SavingsSchema } from './user-savings.schema.js';
+import { OperationModule } from '../operation/operation.module.js';
 
 @Module({
   imports: [
@@ -16,6 +18,10 @@ import { Account, AccountSchema } from './user-account.schema.js';
       {
         name: Account.name,
         schema: AccountSchema,
+      },
+      {
+        name: Savings.name,
+        schema: SavingsSchema,
       },
     ]),
     HttpModule,

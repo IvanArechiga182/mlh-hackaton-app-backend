@@ -26,6 +26,10 @@ export class OperationService {
     const isIncomingTransfer =
       request.type === TransactionType.TRANSFER && request.amount > 0;
 
+    const isSavings =
+      request.type === TransactionType.TRANSFER &&
+      request.description === 'AHORRO';
+
     if (!isDeposit && !isIncomingTransfer) {
       if (Math.abs(request.amount) > actualBalance) {
         throw new BadRequestException(
@@ -53,6 +57,13 @@ export class OperationService {
       await this.userService.updateAccountBalance(
         accountNumber,
         actualBalance,
+        request.amount,
+      );
+    }
+
+    if (isSavings) {
+      await this.userService.updateSavingsBalance(
+        accountNumber,
         request.amount,
       );
     }

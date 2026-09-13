@@ -12,6 +12,7 @@ import { first, firstValueFrom, NotFoundError } from 'rxjs';
 import { HttpService } from '@nestjs/axios';
 import { Account, AccountDocument } from './user-account.schema.js';
 import { TransactionType } from '../operation/enum/transaction-type.enum.js';
+import { Savings, SavingsDocument } from './user-savings.schema.js';
 
 @Injectable()
 export class UserService {
@@ -23,6 +24,9 @@ export class UserService {
 
     @InjectModel(Account.name)
     private readonly accountModel: Model<AccountDocument>,
+
+    @InjectModel(Savings.name)
+    private readonly savingsModel: Model<SavingsDocument>,
 
     private readonly httpService: HttpService,
   ) {}
@@ -66,6 +70,10 @@ export class UserService {
       0,
       0,
     );
+
+    const accountCreatedNumber = userAccount.accountNumber;
+
+    await this.createSavings(accountCreatedNumber);
 
     return {
       customer: user,
@@ -177,5 +185,45 @@ export class UserService {
     );
 
     return updatedBalance;
+  }
+
+  async createSavings(accountNumber: string) {
+    await this.savingsModel.create({
+      accountNumber,
+      balance: 0,
+      name: 'AutoAFORE',
+      active: true,
+    });
+  }
+
+  async updateSavingsBalance(accountNumber: string, amount: number) {
+    const actualBalance = await this.findActualSavings(accountNumber);
+
+    const newBalance = actualBalance ? actualBalance + Math.abs(amount) : 0;
+
+    await this.savingsModel.findOneAndUpdate(
+      {
+        accountNumber,
+      },
+      {
+        balance: newBalance,
+      },
+    );
+  }
+
+  async findActualSavings(accountNumber: string) {
+    const actualSavings = await this.savingsModel
+      .findOne({
+        accountNumber,
+      })
+      .select(['balance']);
+
+    return actualSavings?.balance;
+  }
+
+  async findSaving(accountNumber: string) {
+    return await this.savingsModel.findOne({
+      accountNumber,
+    });
   }
 }
