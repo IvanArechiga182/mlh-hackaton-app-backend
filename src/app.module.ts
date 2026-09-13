@@ -3,7 +3,6 @@ import { createObserveModule } from '@nestjs/observe';
 import { AppService } from './app.service.js';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { MongooseModule } from '@nestjs/mongoose';
-import { TestModule } from './test/test.module.js';
 import { AuthModule } from './auth/auth.module.js';
 import { OperationModule } from './operation/operation.module.js';
 import { UserModule } from './user/user.module.js';
@@ -30,8 +29,6 @@ export const { ObserveModule, ObserveInstrument } = createObserveModule();
         uri: configService.getOrThrow<string>('MONGODB_URI'),
       }),
     }),
-
-    TestModule,
 
     AuthModule,
 

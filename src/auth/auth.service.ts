@@ -1,7 +1,5 @@
 import { JwtService } from '@nestjs/jwt';
 import { LoginDto } from './dto/login.dto.js';
-import { HttpService } from '@nestjs/axios';
-import { firstValueFrom } from 'rxjs';
 import {
   Injectable,
   NotFoundException,
