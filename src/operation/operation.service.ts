@@ -37,7 +37,6 @@ export class OperationService {
     const transaction = await this.transactionModel.create({
       type: request.type,
       medium: request.medium,
-      transactionDate: request.transactionDate,
       status: request.status,
       amount: request.amount,
       customerId: sub,
@@ -61,5 +60,21 @@ export class OperationService {
     return {
       transaction,
     };
+  }
+
+  async findByDates(
+    startDate: Date,
+    endDate: Date,
+    accountNumber: string,
+  ): Promise<any> {
+    const transactions = await this.transactionModel.find({
+      accountNumber,
+      createdAt: {
+        $gte: startDate,
+        $lte: endDate,
+      },
+    });
+
+    return transactions;
   }
 }

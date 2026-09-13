@@ -18,12 +18,6 @@ export class CreateTransactionDto {
   medium: string;
 
   @ApiProperty({
-    example: '2026-09-13',
-    description: 'Fecha de la operación',
-  })
-  transactionDate: string;
-
-  @ApiProperty({
     example: 'completed',
     description: 'Estado de la operación',
   })

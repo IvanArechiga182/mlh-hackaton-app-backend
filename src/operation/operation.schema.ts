@@ -12,9 +12,6 @@ export class Transaction {
   medium: string;
 
   @Prop({ required: true })
-  transactionDate: string;
-
-  @Prop({ required: true })
   status: string;
 
   @Prop({ required: true })

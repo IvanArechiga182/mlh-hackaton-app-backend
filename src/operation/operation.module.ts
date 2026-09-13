@@ -17,5 +17,6 @@ import { Transaction, TransactionSchema } from './operation.schema.js';
   ],
   controllers: [OperationController],
   providers: [OperationService],
+  exports: [OperationService],
 })
 export class OperationModule {}
