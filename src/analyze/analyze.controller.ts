@@ -34,4 +34,21 @@ export class AnalyzeController {
       resource: analysis,
     };
   }
+
+  @Get('recommendation')
+  @ApiOkResponse({
+    description: 'Recomendaciones obtenidas correctamente',
+  })
+  async recommendation(@CurrentUser() userData: any): Promise<IBaseResponse> {
+    const { accountNumber } = userData;
+
+    const recommendation =
+      await this.analyzeService.getRecommendations(accountNumber);
+
+    return {
+      message: 'Recomendacion obtenida correctamente',
+      status: 200,
+      resource: recommendation,
+    };
+  }
 }

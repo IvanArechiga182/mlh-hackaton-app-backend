@@ -77,4 +77,14 @@ export class OperationService {
 
     return transactions;
   }
+
+  async findByIds(ids: string[]) {
+    const transactions = await this.transactionModel.find({
+      _id: {
+        $in: ids,
+      },
+    });
+
+    return transactions;
+  }
 }

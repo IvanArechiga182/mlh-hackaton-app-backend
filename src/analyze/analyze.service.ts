@@ -5,7 +5,7 @@ import { Model } from 'mongoose';
 import { HttpService } from '@nestjs/axios';
 import { AnalyzeDto } from './dto/analyze.dto.js';
 import { OperationService } from '../operation/operation.service.js';
-import { firstValueFrom } from 'rxjs';
+import { firstValueFrom, timestamp } from 'rxjs';
 import { BaseConfigs } from '../common/user-test-configs.js';
 import { PreviousAnalysis } from './previous-state.schema.js';
 
@@ -82,6 +82,42 @@ export class AnalyzeService {
       accountNumber,
       previousState: newPreviousState,
     });
+
+    return data;
+  }
+
+  async getRecommendations(accountNumber: string) {
+    const state = await this.previousAnalysisModel
+      .findOne({
+        accountNumber,
+      })
+      .sort({ createdAt: -1 })
+      .select('previousState');
+
+    const previousState = state?.previousState;
+
+    const candidates = previousState?.candidate_txn_ids;
+
+    const config = BaseConfigs[1];
+
+    const transactions = await this.operationService.findByIds(candidates);
+
+    const response = await firstValueFrom(
+      this.httpService.post(`${process.env.AI_SERVICE_BASE_URI}/v1/recommend`, {
+        user: config.user,
+        config: config.config,
+        state: previousState,
+        candidates: transactions.map((transaction: any) => ({
+          id: transaction._id,
+          merchant: transaction.merchant ?? 'MOVIMIENTO_USUARIO',
+          amount: transaction.amount,
+          timestamp: transaction.createdAt,
+          account_id: transaction.accountNumber,
+        })),
+      }),
+    );
+
+    const { data } = response;
 
     return data;
   }
