@@ -78,6 +78,14 @@ export class OperationService {
     return transactions;
   }
 
+  async findAll(accountNumber: string) {
+    const transactions = await this.transactionModel.find({
+      accountNumber,
+    });
+
+    return transactions;
+  }
+
   async findByIds(ids: string[]) {
     const transactions = await this.transactionModel.find({
       _id: {

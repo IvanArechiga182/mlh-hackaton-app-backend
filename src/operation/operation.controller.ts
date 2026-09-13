@@ -1,4 +1,4 @@
-import { Body, Controller, Post, UseGuards } from '@nestjs/common';
+import { Body, Controller, Get, Post, UseGuards } from '@nestjs/common';
 import { OperationService } from './operation.service.js';
 import {
   ApiBadRequestResponse,
@@ -34,6 +34,22 @@ export class OperationController {
       message: 'Transaccion procesada correctamente',
       status: 200,
       resource: transaction,
+    };
+  }
+
+  @Get()
+  @ApiOkResponse({
+    description: 'Transacciones obtenidas correctamente',
+  })
+  async find(@CurrentUser() userData: any): Promise<IBaseResponse> {
+    const { accountNumber } = userData;
+
+    const transactions = await this.operationService.findAll(accountNumber);
+
+    return {
+      message: 'Transacciones obtenidas correctamente',
+      status: 200,
+      resource: transactions,
     };
   }
 }
