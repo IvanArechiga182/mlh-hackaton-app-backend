@@ -7,7 +7,8 @@ import {
   NotFoundException,
   UnauthorizedException,
 } from '@nestjs/common';
-import { InjectModel } from '@nestjs/mongoose';
+import { UserService } from '../user/user.service.js';
+import * as bcrypt from 'bcrypt';
 
 @Injectable()
 export class AuthService {
@@ -15,52 +16,40 @@ export class AuthService {
 
   constructor(
     private readonly jwtService: JwtService,
-    private readonly httpService: HttpService,
+
+    private readonly userService: UserService,
   ) {}
 
-  // async login(request: LoginDto): Promise<string> {
-  //   const responseCustomer = await firstValueFrom(
-  //     this.httpService.get(
-  //       `${process.env.NESSIE_BASE_URI}/customers/${request.userId}`,
-  //       {
-  //         params: {
-  //           key: this.apiKey,
-  //         },
-  //       },
-  //     ),
-  //   );
+  async login(request: LoginDto): Promise<string> {
+    const { username, password } = request;
 
-  //   const { dataCustomer } = responseCustomer;
+    console.log(process.env.JWT_SECRET);
 
-  //   if (!dataCustomer) {
-  //     throw new NotFoundException(
-  //       `Usuario con cuenta ${request.userAccountNumber} no existe`,
-  //     );
-  //   }
+    const user = await this.userService.getByName(username);
 
-  //   const responseAccount = await firstValueFrom(
-  //     this.httpService.get(
-  //       `${process.env.NESSIE_BASE_URI}/customers/${data._id}/accounts`,
-  //       {
-  //         params: {
-  //           key: this.apiKey,
-  //         },
-  //       },
-  //     ),
-  //   );
+    if (!user) {
+      throw new NotFoundException('El usuario no existe');
+    }
 
-  //   const { dataAccount } = responseAccount;
+    const isValidPassword = await bcrypt.compare(password, user.password);
 
-  //   return this.generateToken(dataAccount);
-  // }
+    if (!isValidPassword) {
+      throw new UnauthorizedException('Credenciales incorrectas.');
+    }
+
+    const token = await this.generateToken(user);
+
+    return token;
+  }
 
   async generateToken(user: any) {
     const payload = {
       sub: user._id,
       name: user.name,
-      userAccount: user.account,
     };
 
-    return this.jwtService.signAsync(payload);
+    return this.jwtService.signAsync(payload, {
+      secret: process.env.JWT_SECRET,
+    });
   }
 }

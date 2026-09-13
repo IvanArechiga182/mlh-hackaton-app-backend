@@ -5,11 +5,11 @@ export class LoginDto {
     example: '938832-8371AASd...',
     description: 'Primer nombre del usuario',
   })
-  userId: string;
+  username: string;
 
   @ApiProperty({
-    example: '9939982',
-    description: 'Numero de cuenta del usuario',
+    example: 'SafePassw0rd123',
+    description: 'Contraseña del usuario',
   })
-  userAccountNumber: string;
+  password: string;
 }
