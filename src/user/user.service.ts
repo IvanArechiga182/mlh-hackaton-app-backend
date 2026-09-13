@@ -1,12 +1,17 @@
-import { ConflictException, Injectable } from '@nestjs/common';
+import {
+  ConflictException,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { User, UserDocument } from './user.schema.js';
 import { Model } from 'mongoose';
 import { CreateUserDto } from './dto/create-user-request.dto.js';
 import * as bcrypt from 'bcrypt';
-import { first, firstValueFrom } from 'rxjs';
+import { first, firstValueFrom, NotFoundError } from 'rxjs';
 import { HttpService } from '@nestjs/axios';
 import { Account, AccountDocument } from './user-account.schema.js';
+import { TransactionType } from '../operation/enum/transaction-type.enum.js';
 
 @Injectable()
 export class UserService {
@@ -79,7 +84,17 @@ export class UserService {
       return null;
     }
 
-    return user;
+    const accountNumber = await this.accountModel
+      .findOne({
+        customerId: user.nessieId,
+      })
+      .select('accountNumber')
+      .exec();
+
+    return {
+      user,
+      accountNumber,
+    };
   }
 
   async getUsers(): Promise<any> {
@@ -125,5 +140,42 @@ export class UserService {
     });
 
     return account;
+  }
+
+  async findAccountBalance(accountNumber: string): Promise<number> {
+    const balance = await this.accountModel
+      .findOne({
+        accountNumber: accountNumber,
+      })
+      .select('balance')
+      .exec();
+
+    if (!balance) {
+      throw new NotFoundException(
+        `La cuenta ${accountNumber} no existe o no está ligada a ningún cliente.`,
+      );
+    }
+
+    return Number(balance.balance);
+  }
+
+  async updateAccountBalance(
+    accountNumber: string,
+    actualBalance: number,
+    transactionAmount: number,
+  ): Promise<any> {
+    const newBalance = actualBalance + transactionAmount;
+
+    const updatedBalance = await this.accountModel.findOneAndUpdate(
+      { accountNumber },
+      {
+        balance: newBalance,
+      },
+      {
+        new: true,
+      },
+    );
+
+    return updatedBalance;
   }
 }

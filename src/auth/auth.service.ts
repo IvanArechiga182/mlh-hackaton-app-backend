@@ -21,9 +21,7 @@ export class AuthService {
   async login(request: LoginDto): Promise<string> {
     const { username, password } = request;
 
-    console.log(process.env.JWT_SECRET);
-
-    const user = await this.userService.getByName(username);
+    const { user, accountNumber } = await this.userService.getByName(username);
 
     if (!user) {
       throw new NotFoundException('El usuario no existe');
@@ -35,15 +33,16 @@ export class AuthService {
       throw new UnauthorizedException('Credenciales incorrectas.');
     }
 
-    const token = await this.generateToken(user);
+    const token = await this.generateToken(user, accountNumber.accountNumber);
 
     return token;
   }
 
-  async generateToken(user: any) {
+  async generateToken(user: any, accountNumber: string) {
     const payload = {
-      sub: user._id,
-      name: user.name,
+      sub: user._id.toString(),
+      name: `${user.firstName} ${user.lastName}`,
+      accountNumber: accountNumber,
     };
 
     return this.jwtService.signAsync(payload, {

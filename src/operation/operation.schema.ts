@@ -6,9 +6,6 @@ export type TransactionDocument = HydratedDocument<Transaction>;
 @Schema({ timestamps: true })
 export class Transaction {
   @Prop({ required: true })
-  nessieId: string;
-
-  @Prop({ required: true })
   type: string;
 
   @Prop({ required: true })
@@ -27,13 +24,13 @@ export class Transaction {
   customerId: string;
 
   @Prop({ required: true })
-  accountId: string;
+  accountNumber: string;
 
   @Prop()
   description: string;
 
   @Prop()
-  merchantId: string;
+  merchant: string;
 }
 
 export const TransactionSchema = SchemaFactory.createForClass(Transaction);
