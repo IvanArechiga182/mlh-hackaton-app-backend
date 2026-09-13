@@ -63,7 +63,7 @@ export class AnalyzeService {
       this.httpService.post(`${process.env.AI_SERVICE_BASE_URI}/v1/analyze`, {
         user: config.user,
         config: config.config,
-        previus_state: previousState,
+        previous_state: previousState,
         transactions: transactionsPayload,
       }),
     );
